@@ -8,10 +8,7 @@ import org.sonatype.nexus.blobstore.api.BlobStore;
 import org.sonatype.nexus.blobstore.api.BlobStoreConfiguration;
 import org.sonatype.nexus.blobstore.api.BlobStoreManager;
 import org.sonatype.nexus.blobstore.file.FileBlobStore;
-import org.sonatype.nexus.capability.CapabilityIdentity;
-import org.sonatype.nexus.capability.CapabilityReference;
-import org.sonatype.nexus.capability.CapabilityRegistry;
-import org.sonatype.nexus.capability.CapabilityType;
+import org.sonatype.nexus.capability.*;
 import org.sonatype.nexus.cleanup.storage.CleanupPolicy;
 import org.sonatype.nexus.cleanup.storage.CleanupPolicyStorage;
 import org.sonatype.nexus.common.app.BaseUrlManager;
@@ -40,15 +37,13 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.*;
 
 @Named("cascPlugin")
 @Description("Casc Plugin")
@@ -128,8 +123,9 @@ public class NexusCascPlugin extends StateGuardLifecycleSupport {
         }
 
         List<ConfigCapability> capabilities = config.getCapabilities();
+        Boolean pruneCapabilitiesByType = config.getPruneCapabilitiesByType();
         if (capabilities != null) {
-            applyCapabilitiesConfig(capabilities);
+            applyCapabilitiesConfig(capabilities, pruneCapabilitiesByType == null || pruneCapabilitiesByType);
         }
     }
 
@@ -208,44 +204,79 @@ public class NexusCascPlugin extends StateGuardLifecycleSupport {
         }
     }
 
-    private void applyCapabilitiesConfig(List<ConfigCapability> capabilities) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        for (ConfigCapability capabilityConfig : capabilities) {
-            CapabilityType type = CapabilityType.capabilityType(capabilityConfig.getType());
-            log.info("type={}", type.toString());
-            CapabilityReference existing = capabilityRegistry.getAll().stream()
-                    .filter(cap -> cap.context().type().equals(type))
-                    .findFirst()
-                    .orElse(null);
+    private void applyCapabilitiesConfig(List<ConfigCapability> capabilities, boolean pruneByType) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 
-            if (existing != null) {
-                boolean enabled = capabilityConfig.getEnabled() == null ? existing.context().isEnabled() : capabilityConfig.getEnabled();
-                CapabilityIdentity id = getCapabilityId(existing);
+        Map<CapabilityType, List<ConfigCapability>> byType = capabilities.stream()
+                .collect(groupingBy(
+                        cc -> CapabilityType.capabilityType(cc.getType()),
+                        toList()
+                ));
 
-                log.info("Updating capability of type {} and id {}", capabilityConfig.getType(), id);
+        Map<CapabilityType, List<CapabilityContext>> existingByType = capabilityRegistry.getAll().stream()
+                .map(CapabilityReference::context)
+                .collect(groupingBy(CapabilityContext::type, toCollection(ArrayList::new)));
 
-                capabilityRegistry.update(
-                        id,
-                        enabled,
-                        capabilityConfig.getNotes(),
-                        capabilityConfig.getAttributes()
-                );
-            } else {
-                log.info("Creating capability of type {}", capabilityConfig.getType());
+        for (Map.Entry<CapabilityType, List<ConfigCapability>> ent : byType.entrySet()) {
+            CapabilityType type = ent.getKey();
+            log.info("type={}", type);
+            List<CapabilityContext> existingWithType = existingByType.get(type);
 
-                boolean enabled = capabilityConfig.getEnabled() == null ? true : capabilityConfig.getEnabled();
-                capabilityRegistry.add(
-                        type,
-                        enabled,
-                        capabilityConfig.getNotes(),
-                        capabilityConfig.getAttributes()
-                );
+            for (ConfigCapability capabilityConfig : ent.getValue()) {
+
+                int existingIndex = -1;
+                if (existingWithType != null) {
+                    int bestMatch = Integer.MAX_VALUE; // Smaller is better
+                    for (int i = 0; i < existingWithType.size(); ++i) {
+                        Map<String, String> properties = existingWithType.get(i).properties();
+
+                        int mismatchedPropertyCount = Math.max(properties.size(), capabilityConfig.getAttributes().size());
+                        for (Map.Entry<String, String> prop : capabilityConfig.getAttributes().entrySet()) {
+                            if (Objects.equals(prop.getValue(), properties.get(prop.getKey()))) {
+                                --mismatchedPropertyCount;
+                            }
+                        }
+
+                        if (mismatchedPropertyCount < bestMatch) {
+                            existingIndex = i;
+                            bestMatch = mismatchedPropertyCount;
+                        }
+                    }
+                }
+
+                if (existingIndex >= 0) {
+                    CapabilityContext existing = existingWithType.remove(existingIndex);
+                    boolean enabled = capabilityConfig.getEnabled() == null ? existing.isEnabled() : capabilityConfig.getEnabled();
+                    CapabilityIdentity id = existing.id();
+
+                    log.info("Updating capability of type {} and id {}", capabilityConfig.getType(), id);
+
+                    capabilityRegistry.update(
+                            id,
+                            enabled,
+                            capabilityConfig.getNotes(),
+                            capabilityConfig.getAttributes()
+                    );
+                } else {
+                    log.info("Creating capability of type {}", capabilityConfig.getType());
+
+                    boolean enabled = capabilityConfig.getEnabled() == null || capabilityConfig.getEnabled();
+                    capabilityRegistry.add(
+                            type,
+                            enabled,
+                            capabilityConfig.getNotes(),
+                            capabilityConfig.getAttributes()
+                    );
+                }
+
+            }
+
+            if (pruneByType && existingWithType != null) {
+                for (CapabilityContext remaining : existingWithType) {
+                    log.info("Removing capability of type {} and id {}", remaining.type(), remaining.id());
+                    capabilityRegistry.remove(remaining.id());
+                }
             }
         }
-    }
-
-    private CapabilityIdentity getCapabilityId(CapabilityReference existing) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Method m = existing.getClass().getMethod("id");
-        return (CapabilityIdentity) m.invoke(existing);
     }
 
     private void applyRepositoryConfig(ConfigRepository repository) {
@@ -509,7 +540,7 @@ public class NexusCascPlugin extends StateGuardLifecycleSupport {
         }
 
         if (security.getRoles() != null) {
-            List<String> sources = security.getRoles().stream().map(ConfigSecurityRole::getSource).distinct().collect(Collectors.toList());
+            List<String> sources = security.getRoles().stream().map(ConfigSecurityRole::getSource).distinct().collect(toList());
 
             if (sources != null) {
                 sources.forEach(source -> {
@@ -517,7 +548,7 @@ public class NexusCascPlugin extends StateGuardLifecycleSupport {
                         AuthorizationManager authManager = securitySystem.getAuthorizationManager(source);
                         if (!authManager.supportsWrite())
                             throw new NotWritableException("AuthorizationManager: " + source);
-                        List<ConfigSecurityRole> roles = security.getRoles().stream().filter(p -> p.getSource().contentEquals(source)).collect(Collectors.toList());
+                        List<ConfigSecurityRole> roles = security.getRoles().stream().filter(p -> p.getSource().contentEquals(source)).collect(toList());
                         if (roles != null) {
                             for (ConfigSecurityRole r : roles) {
                                 if (r.isEnabled()) {
@@ -629,7 +660,7 @@ public class NexusCascPlugin extends StateGuardLifecycleSupport {
                             userConfig.getEmail(),
                             userConfig.getActive() != null ? userConfig.getActive() : true,
                             userConfig.getPassword(),
-                            userConfig.getRoles().stream().map(ConfigSecurityUserRole::getRole).collect(Collectors.toList())
+                            userConfig.getRoles().stream().map(ConfigSecurityUserRole::getRole).collect(toList())
                     );
                 }
             });
