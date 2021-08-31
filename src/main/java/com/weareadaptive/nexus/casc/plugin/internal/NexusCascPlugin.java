@@ -227,12 +227,24 @@ public class NexusCascPlugin extends StateGuardLifecycleSupport {
                 if (existingWithType != null) {
                     int bestMatch = Integer.MAX_VALUE; // Smaller is better
                     for (int i = 0; i < existingWithType.size(); ++i) {
-                        Map<String, String> properties = existingWithType.get(i).properties();
+                        Map<String, String> existingProperties = existingWithType.get(i).properties();
+                        Map<String, String> configProperties = capabilityConfig.getAttributes();
 
-                        int mismatchedPropertyCount = Math.max(properties.size(), capabilityConfig.getAttributes().size());
-                        for (Map.Entry<String, String> prop : capabilityConfig.getAttributes().entrySet()) {
-                            if (Objects.equals(prop.getValue(), properties.get(prop.getKey()))) {
-                                --mismatchedPropertyCount;
+                        int mismatchedPropertyCount;
+                        if(configProperties == null) {
+                            mismatchedPropertyCount = existingProperties == null ? 0 : existingProperties.size();
+                        } else if(existingProperties == null) {
+                            mismatchedPropertyCount = configProperties.size();
+                        } else {
+                            Set<String> totalKeys = new HashSet<>(existingProperties.size());
+                            totalKeys.addAll(existingProperties.keySet());
+                            totalKeys.addAll(configProperties.keySet());
+
+                            mismatchedPropertyCount = totalKeys.size();
+                            for (String key : totalKeys) {
+                                if (Objects.equals(configProperties.get(key), existingProperties.get(key))) {
+                                    --mismatchedPropertyCount;
+                                }
                             }
                         }
 
