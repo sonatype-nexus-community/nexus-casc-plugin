@@ -48,7 +48,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -513,7 +512,7 @@ public class NexusCascPlugin extends StateGuardLifecycleSupport {
         }
 
         if (security.getRoles() != null) {
-            boolean pruneRolesBySource = security.getPruneRolesBySource();
+            boolean pruneRolesBySource = security.getPruneRolesBySource() == null || security.getPruneRolesBySource();
             Map<String, List<ConfigSecurityRole>> rolesBySource = security.getRoles().stream()
                     .collect(groupingBy(ConfigSecurityRole::getSource, toList()));
             for (Map.Entry<String, List<ConfigSecurityRole>> ent : rolesBySource.entrySet()) {
@@ -525,20 +524,28 @@ public class NexusCascPlugin extends StateGuardLifecycleSupport {
                         throw new NotWritableException("AuthorizationManager: " + source);
 
                     // Remove roles first, so we fail fast if an enabled role references a removed one
-                    Set<String> idsToRemove = new HashSet<>();
+                    Map<String, Boolean> idsToRemove = new HashMap<>();
                     if(pruneRolesBySource) {
-                        authManager.listRoles().stream().map(Role::getRoleId).forEach(idsToRemove::add);
+                        authManager.listRoles().stream().map(Role::getRoleId).forEach(id -> idsToRemove.put(id, false));
                     }
                     for (ConfigSecurityRole role : roles) {
                         if (role.isEnabled()) {
                             idsToRemove.remove(role.getId());
                         } else {
-                            idsToRemove.add(role.getId());
+                            idsToRemove.put(role.getId(), true);
                         }
                     }
-                    for (String roleId : idsToRemove) {
-                        log.info("Deleting role {}", roleId);
-                        authManager.deleteRole(roleId);
+                    for (Map.Entry<String, Boolean> toRemove : idsToRemove.entrySet()) {
+                        log.info("Deleting role {}", toRemove.getKey());
+                        try {
+                            authManager.deleteRole(toRemove.getKey());
+                        } catch(Exception e) {
+                            if (toRemove.getValue()) {
+                                throw e;
+                            } else {
+                                log.warn("Could not delete role {}: {}", toRemove.getKey(), e.getMessage());
+                            }
+                        }
                     }
 
                     for (ConfigSecurityRole r : roles) {
