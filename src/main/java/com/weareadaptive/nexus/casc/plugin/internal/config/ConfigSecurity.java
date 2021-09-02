@@ -5,6 +5,7 @@ import java.util.List;
 public class ConfigSecurity {
     private Boolean anonymousAccess;
     private Boolean pruneUsers;
+    private Boolean pruneRolesBySource;
     private List<ConfigSecurityPrivilege> privileges;
     private List<ConfigSecurityRole> roles;
     private List<ConfigSecurityUser> users;
@@ -24,6 +25,14 @@ public class ConfigSecurity {
 
     public void setPruneUsers(Boolean pruneUsers) {
         this.pruneUsers = pruneUsers;
+    }
+
+    public Boolean getPruneRolesBySource() {
+        return pruneRolesBySource;
+    }
+
+    public void setPruneRolesBySource(Boolean pruneRolesBySource) {
+        this.pruneRolesBySource = pruneRolesBySource;
     }
 
     public List<ConfigSecurityPrivilege> getPrivileges() { return privileges; }
