@@ -4,21 +4,21 @@ core:
   userAgentCustomization: "CasC test"
   connectionTimeout: 60
   connectionRetryAttempts: 10
-  httpProxy:
-    host: proxy.internal.lan
-    port: 3128
-    username: nexus-user
-    password: ${PROXY_PASSWORD}
-  httpsProxy:
-    host: proxy.internal.lan
-    port: 3128
-    username: nexus-user
-    password: ${PROXY_PASSWORD}
-    ntlmHost: dc.internal.lan
-    ntlmDomain: internal.lan
-  nonProxyHosts:
-    - host1.internal.lan
-    - host2.internal.lan
+  #httpProxy:
+  #  host: proxy.internal.lan
+  #  port: 3128
+  #  username: nexus-user
+  #  password: ${PROXY_PASSWORD}
+  #httpsProxy:
+  #  host: proxy.internal.lan
+  #  port: 3128
+  #  username: nexus-user
+  #  password: ${PROXY_PASSWORD}
+  #  ntlmHost: dc.internal.lan
+  #  ntlmDomain: internal.lan
+  #nonProxyHosts:
+  #  - host1.internal.lan
+  #  - host2.internal.lan
 capabilities:
   - type: analytics-configuration
     enabled: false
@@ -78,6 +78,14 @@ security:
         - nx-healthcheck-read
         - nx-repository-view-*-*-*
         - nx-search-read
+    - id: repository-read-nodejs-dist
+      enabled: true
+      source: default
+      name: repository-read-nodejs-dist
+      description: "Read permission for NodeJS Dist repository"
+      privileges:
+        - nx-repository-view-raw-nodejs-dist-browse
+        - nx-repository-view-raw-nodejs-dist-read
   users:
     - username: anonymous
       firstName: Anonymous
@@ -88,6 +96,8 @@ security:
       roles:
         - source: "default"
           role: repository-read-docker
+        - source: "default"
+          role: repository-read-nodejs-dist
     - username: johndoe
       firstName: John
       lastName: Doe
