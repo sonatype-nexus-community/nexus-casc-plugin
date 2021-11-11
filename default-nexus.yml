@@ -86,6 +86,14 @@ security:
       privileges:
         - nx-repository-view-raw-nodejs-dist-browse
         - nx-repository-view-raw-nodejs-dist-read
+    - id: repository-read-cypress-dist
+      enabled: true
+      source: default
+      name: repository-read-cypress-dist
+      description: "Read permission for Cypress Download repository"
+      privileges:
+        - nx-repository-view-raw-cypress-dist-browse
+        - nx-repository-view-raw-cypress-dist-read
   users:
     - username: anonymous
       firstName: Anonymous
@@ -96,6 +104,8 @@ security:
       roles:
         - source: "default"
           role: ui-minimal
+        - source: "default"
+          role: repository-read-cypress-dist
         - source: "default"
           role: repository-read-docker-proxy
         - source: "default"
@@ -299,6 +309,30 @@ repository:
         cleanup:
           policyName:
             - cleanup-apt-proxy
+    - name: cypress-dist
+      online: true
+      recipeName: raw-proxy
+      attributes:
+        raw:
+          contentDisposition: ATTACHMENT
+        proxy:
+          remoteUrl: https://download.cypress.io/
+          contentMaxAge: -1.0
+          metadataMaxAge: 1440.0
+        httpclient:
+          blocked: false
+          autoBlock: true
+          connection:
+            useTrustStore: false
+        storage:
+          blobStoreName: raw
+          strictContentTypeValidation: true
+        negativeCache:
+          enabled: true
+          timeToLive: 1440.0
+        cleanup:
+          policyName:
+            - cleanup-raw-proxy
     # https://help.sonatype.com/repomanager3/formats/docker-registry
     - name: docker-hosted
       online: true
