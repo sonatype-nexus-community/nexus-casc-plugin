@@ -5,25 +5,26 @@
     <parent>
         <groupId>org.sonatype.nexus.plugins</groupId>
         <artifactId>nexus-plugins</artifactId>
-        <version>3.33.1-01</version>
+        <version>3.37.1-01</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.weareadaptive.nexus</groupId>
     <artifactId>nexus-casc-plugin</artifactId>
-    <version>3.33.1-01</version>
+    <version>3.37.1-01</version>
     <packaging>bundle</packaging>
 
     <properties>
-        <nexus.docker.version>3.33.1</nexus.docker.version>
+        <nexus.docker.version>3.37.1</nexus.docker.version>
 
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
         <build-helper-maven-plugin.version>3.2.0</build-helper-maven-plugin.version>
         <docker-compose-maven-plugin.version>4.0.0</docker-compose-maven-plugin.version>
 
-        <snakeyaml.version>1.26</snakeyaml.version>
+        <snakeyaml.version>1.28</snakeyaml.version>
 
         <junit-jupiter.version>5.6.2</junit-jupiter.version>
+        <system-lambda.version>1.2.0</system-lambda.version>
     </properties>
 
     <dependencies>
@@ -77,6 +78,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.github.stefanbirkner</groupId>
+            <artifactId>system-lambda</artifactId>
+            <version>${system-lambda.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <version>${junit-jupiter.version}</version>
@@ -119,6 +126,24 @@
             </resource>
         </resources>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-dependency-convergence</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <fail>true</fail>
+                            <rules>
+                                <DependencyConvergence/>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>karaf-maven-plugin</artifactId>
@@ -233,8 +258,8 @@
                     </execution>
                 </executions>
             </plugin>
-        </plugins>
-    </build>
+                </plugins>
+            </build>
 
     <repositories>
         <repository>

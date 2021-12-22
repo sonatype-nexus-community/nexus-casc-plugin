@@ -4,22 +4,24 @@ core:
   userAgentCustomization: "CasC test"
   connectionTimeout: 60
   connectionRetryAttempts: 10
-  httpProxy:
-    host: proxy.internal.lan
-    port: 3128
-    username: nexus-user
-    password: ${PROXY_PASSWORD}
-  httpsProxy:
-    host: proxy.internal.lan
-    port: 3128
-    username: nexus-user
-    password: ${PROXY_PASSWORD}
-    ntlmHost: dc.internal.lan
-    ntlmDomain: internal.lan
-  nonProxyHosts:
-    - host1.internal.lan
-    - host2.internal.lan
+  #httpProxy:
+  #  host: proxy.internal.lan
+  #  port: 3128
+  #  username: nexus-user
+  #  password: ${PROXY_PASSWORD}
+  #httpsProxy:
+  #  host: proxy.internal.lan
+  #  port: 3128
+  #  username: nexus-user
+  #  password: ${PROXY_PASSWORD}
+  #  ntlmHost: dc.internal.lan
+  #  ntlmDomain: internal.lan
+  #nonProxyHosts:
+  #  - host1.internal.lan
+  #  - host2.internal.lan
 capabilities:
+  - type: analytics-configuration
+    enabled: false
   - type: OutreachManagementCapability
     enabled: false
 security:
@@ -43,18 +45,22 @@ security:
         repository: docker-proxy
         actions: read,update
   roles:
-    - id: repository-read-docker
+    - id: ui-minimal
       enabled: true
       source: default
-      name: repository-read-docker
-      description: "Docker Anonymous Access for public proxy / group repositories"
+      name: ui-minimal
+      description: "UI Minimal"
       privileges:
         - nx-healthcheck-read
-        - nx-repository-view-docker-docker-browse
+        - nx-search-read
+    - id: repository-read-docker-proxy
+      enabled: true
+      source: default
+      name: repository-read-docker-proxy
+      description: "Docker Anonymous Access for public proxy repository"
+      privileges:
         - nx-repository-view-docker-docker-proxy-browse
         - nx-repository-view-docker-docker-proxy-read
-        - nx-repository-view-docker-docker-read
-        - nx-search-read
     - id: repository-read-all
       enabled: true
       source: default
@@ -62,10 +68,8 @@ security:
       description: "Read All permission for repositories"
       privileges:
         - nx-apikey-all
-        - nx-healthcheck-read
         - nx-repository-view-*-*-browse
         - nx-repository-view-*-*-read
-        - nx-search-read
     - id: repository-write-all
       enabled: true
       source: default
@@ -73,9 +77,23 @@ security:
       description: "Write All permission for repositories"
       privileges:
         - nx-apikey-all
-        - nx-healthcheck-read
         - nx-repository-view-*-*-*
-        - nx-search-read
+    - id: repository-read-nodejs-dist
+      enabled: true
+      source: default
+      name: repository-read-nodejs-dist
+      description: "Read permission for NodeJS Dist repository"
+      privileges:
+        - nx-repository-view-raw-nodejs-dist-browse
+        - nx-repository-view-raw-nodejs-dist-read
+    - id: repository-read-cypress-dist
+      enabled: true
+      source: default
+      name: repository-read-cypress-dist
+      description: "Read permission for Cypress Download repository"
+      privileges:
+        - nx-repository-view-raw-cypress-dist-browse
+        - nx-repository-view-raw-cypress-dist-read
   users:
     - username: anonymous
       firstName: Anonymous
@@ -85,7 +103,13 @@ security:
       email: anonymous@example.org
       roles:
         - source: "default"
-          role: repository-read-docker
+          role: ui-minimal
+        - source: "default"
+          role: repository-read-cypress-dist
+        - source: "default"
+          role: repository-read-docker-proxy
+        - source: "default"
+          role: repository-read-nodejs-dist
     - username: johndoe
       firstName: John
       lastName: Doe
@@ -102,6 +126,8 @@ security:
       updateExistingPassword: false
       email: janedoe@example.org
       roles:
+        - source: "default"
+          role: ui-minimal
         - source: "default"
           role: repository-write-all
 repository:
@@ -283,6 +309,30 @@ repository:
         cleanup:
           policyName:
             - cleanup-apt-proxy
+    - name: cypress-dist
+      online: true
+      recipeName: raw-proxy
+      attributes:
+        raw:
+          contentDisposition: ATTACHMENT
+        proxy:
+          remoteUrl: https://download.cypress.io/
+          contentMaxAge: -1.0
+          metadataMaxAge: 1440.0
+        httpclient:
+          blocked: false
+          autoBlock: true
+          connection:
+            useTrustStore: false
+        storage:
+          blobStoreName: raw
+          strictContentTypeValidation: true
+        negativeCache:
+          enabled: true
+          timeToLive: 1440.0
+        cleanup:
+          policyName:
+            - cleanup-raw-proxy
     # https://help.sonatype.com/repomanager3/formats/docker-registry
     - name: docker-hosted
       online: true
