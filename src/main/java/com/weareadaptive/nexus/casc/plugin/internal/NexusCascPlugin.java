@@ -552,66 +552,78 @@ public class NexusCascPlugin extends StateGuardLifecycleSupport {
         }
 
         if (security.getRoles() != null) {
-            List<String> sources = security.getRoles().stream().map(ConfigSecurityRole::getSource).distinct().collect(toList());
+            boolean pruneRolesBySource = security.getPruneRolesBySource() == null || security.getPruneRolesBySource();
+            Map<String, List<ConfigSecurityRole>> rolesBySource = security.getRoles().stream()
+                    .collect(groupingBy(ConfigSecurityRole::getSource, toList()));
+            for (Map.Entry<String, List<ConfigSecurityRole>> ent : rolesBySource.entrySet()) {
+                String source = ent.getKey();
+                List<ConfigSecurityRole> roles = ent.getValue();
+                try {
+                    AuthorizationManager authManager = securitySystem.getAuthorizationManager(source);
+                    if (!authManager.supportsWrite())
+                        throw new NotWritableException("AuthorizationManager: " + source);
 
-            if (sources != null) {
-                sources.forEach(source -> {
-                    try {
-                        AuthorizationManager authManager = securitySystem.getAuthorizationManager(source);
-                        if (!authManager.supportsWrite())
-                            throw new NotWritableException("AuthorizationManager: " + source);
-                        List<ConfigSecurityRole> roles = security.getRoles().stream().filter(p -> p.getSource().contentEquals(source)).collect(toList());
-                        if (roles != null) {
-                            for (ConfigSecurityRole r : roles) {
-                                if (r.isEnabled()) {
-                                    Role tmpRole;
-                                    Boolean update = false;
-                                    try {
-                                        tmpRole = authManager.getRole(r.getId());
-                                        update = true;
-                                        tmpRole.setName(r.getName());
-                                        tmpRole.setDescription(r.getDescription());
-                                        tmpRole.setReadOnly(false);
-                                        tmpRole.setRoles(r.getRoles().stream().collect(Collectors.toSet()));
-                                        tmpRole.setPrivileges(r.getPrivileges().stream().collect(Collectors.toSet()));
-                                    } catch (NoSuchRoleException e) {
-                                        tmpRole = new Role(
-                                                r.getId(),
-                                                r.getName(),
-                                                r.getDescription(),
-                                                r.getSource(),
-                                                false,
-                                                r.getRoles() != null ? r.getRoles().stream().distinct().collect(Collectors.toSet()) : null,
-                                                r.getPrivileges() != null ? r.getPrivileges().stream().distinct().collect(Collectors.toSet()) : null
-                                        );
-                                    }
-
-                                    try {
-                                        if (update) {
-                                            log.info("Updating role {}", r.getId());
-                                            authManager.updateRole(tmpRole);
-
-                                        } else {
-                                            log.info("Creating role {}", r.getId());
-                                            authManager.addRole(tmpRole);
-                                        }
-                                    } catch (RuntimeException e) {
-                                        log.error("Failed to create/update role {}", r.getId(), e);
-                                    }
-                                } else {
-                                    log.info("Deleting role {}", r.getId());
-                                    authManager.deleteRole(r.getId());
-                                }
+                    // Remove roles first, so we fail fast if an enabled role references a removed one
+                    Map<String, Boolean> idsToRemove = new HashMap<>();
+                    if(pruneRolesBySource) {
+                        authManager.listRoles().stream().map(Role::getRoleId).forEach(id -> idsToRemove.put(id, false));
+                    }
+                    for (ConfigSecurityRole role : roles) {
+                        if (role.isEnabled()) {
+                            idsToRemove.remove(role.getId());
+                        } else {
+                            idsToRemove.put(role.getId(), true);
+                        }
+                    }
+                    for (Map.Entry<String, Boolean> toRemove : idsToRemove.entrySet()) {
+                        log.info("Deleting role {}", toRemove.getKey());
+                        try {
+                            authManager.deleteRole(toRemove.getKey());
+                        } catch(Exception e) {
+                            if (toRemove.getValue()) {
+                                throw e;
+                            } else {
+                                log.warn("Could not delete role {}: {}", toRemove.getKey(), e.getMessage());
                             }
                         }
-                    } catch (NoSuchAuthorizationManagerException e) {
-                        log.error("AuthorizationManager {} does not exist.", source, e);
-                    } catch (NotWritableException e) {
-                        log.error("AuthorizationManager {} is not writable", source, e);
                     }
-                });
-            } else {
-                log.info("No sources were available for roles");
+
+                    for (ConfigSecurityRole r : roles) {
+                        if (r.isEnabled()) {
+                            Role tmpRole;
+                            boolean update = false;
+                            try {
+                                tmpRole = authManager.getRole(r.getId());
+                                update = true;
+                            } catch (NoSuchRoleException e) {
+                                tmpRole = new Role();
+                                tmpRole.setRoleId(r.getId());
+                                tmpRole.setSource(r.getSource());
+                            }
+                            tmpRole.setName(r.getName());
+                            tmpRole.setDescription(r.getDescription());
+                            tmpRole.setReadOnly(false);
+                            tmpRole.setRoles(r.getRoles() == null ? null : new HashSet<>(r.getRoles()));
+                            tmpRole.setPrivileges(r.getPrivileges() == null ? null : new HashSet<>(r.getPrivileges()));
+
+                            try {
+                                if (update) {
+                                    log.info("Updating role {}", r.getId());
+                                    authManager.updateRole(tmpRole);
+                                } else {
+                                    log.info("Creating role {}", r.getId());
+                                    authManager.addRole(tmpRole);
+                                }
+                            } catch (RuntimeException e) {
+                                log.error("Failed to create/update role {}", r.getId(), e);
+                            }
+                        }
+                    }
+                } catch (NoSuchAuthorizationManagerException e) {
+                    log.error("AuthorizationManager {} does not exist.", source, e);
+                } catch (NotWritableException e) {
+                    log.error("AuthorizationManager {} is not writable", source, e);
+                }
             }
         }
 
