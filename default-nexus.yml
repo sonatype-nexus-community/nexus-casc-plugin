@@ -309,6 +309,30 @@ repository:
         cleanup:
           policyName:
             - cleanup-apt-proxy
+    - name: chromedriver-dist
+      online: true
+      recipeName: raw-proxy
+      attributes:
+        raw:
+          contentDisposition: ATTACHMENT
+        proxy:
+          remoteUrl: https://chromedriver.storage.googleapis.com/
+          contentMaxAge: -1.0
+          metadataMaxAge: 1440.0
+        httpclient:
+          blocked: false
+          autoBlock: true
+          connection:
+            useTrustStore: false
+        storage:
+          blobStoreName: raw
+          strictContentTypeValidation: true
+        negativeCache:
+          enabled: true
+          timeToLive: 1440.0
+        cleanup:
+          policyName:
+            - cleanup-raw-proxy
     - name: cypress-dist
       online: true
       recipeName: raw-proxy
