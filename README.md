@@ -205,13 +205,13 @@ repository:
       format: maven2
       notes: ''
       criteria:
-        lastDownloadBefore: 864000
+        lastDownloaded: 864000
         lastBlobUpdated: 864000
     - name: cleanup-npm-proxy
       format: npm
       notes: ''
       criteria:
-        lastDownloadBefore: 864000
+        lastDownloaded: 864000
     - name: cleanup-docker-proxy
       format: docker
       notes: ''
