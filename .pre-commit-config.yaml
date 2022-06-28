@@ -28,9 +28,9 @@ repos:
     rev: 2.1.6
     hooks:
       - id: shellcheck
-        exclude: 'gradlew$'
+        exclude: 'gradlew|mvnw$'
       - id: shfmt
-        exclude: 'gradlew$'
+        exclude: 'gradlew|mvnw$'
         args:
           - '-i 2 -ci -bn -sr'
   - repo: https://github.com/hadolint/hadolint

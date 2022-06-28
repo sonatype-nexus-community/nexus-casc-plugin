@@ -32,12 +32,12 @@ Requires:
 
 To just build the `.kar` archive:
 ```bash
-mvn package
+./mvnw package
 ```
 
 To build the `.kar` archive and execute the (limited!) integration tests via `docker-compose`:
 ```bash
-mvn verify
+./mvnw verify
 ```
 
 ## Usage
@@ -62,7 +62,7 @@ is located in the `password_johndoe` file. The YAML configuration is located in 
 proxy configuration just to test its configuration. Removing `httpProxy` and/or `httpsProxy` entirely will also clear the relevant
 proxy settings on the next boot.
 ```shell
-mvn package
+./mvnw package
 docker-compose run nexus
 ```
 

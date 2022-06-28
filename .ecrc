@@ -1,6 +1,6 @@
 {
   "Exclude": [
-    "^(\\.idea/.*|password_.*|src/test/resources/test)$"
+    "^(\\.idea/.*|mvnw.*?|password_.*|src/test/resources/test)$"
   ],
   "Disable": {
     "Note #1": "Indent size cannot be consistently enforced, leave it to the language-specific formatters and linters",
