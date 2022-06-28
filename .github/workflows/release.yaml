@@ -1,3 +1,4 @@
+---
 name: Publish bundle to nexus-casc-plugin release
 
 on:

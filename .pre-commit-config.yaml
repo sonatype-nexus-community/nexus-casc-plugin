@@ -1,15 +1,44 @@
 ---
+default_stages:
+  - commit
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks.git
-    rev: v4.2.0
+    rev: v4.3.0
     hooks:
       - id: trailing-whitespace
-        files: \.(js|json|rb|md|py|sh|txt|yaml|yml)$
+        files: \.(conf|j2|js|json|rb|md|py|sh|tf|tm?pl|txt|yaml|yml)$
       - id: check-case-conflict
       - id: check-json
+      - id: check-toml
       - id: end-of-file-fixer
-        exclude: "^(password_.*|src/test/resources/test)$"
+        exclude: '^(\.idea/.*|password_.*|src/test/resources/test)$'
   - repo: https://github.com/adrienverge/yamllint.git
     rev: v1.26.3
     hooks:
       - id: yamllint
+  - repo: https://github.com/Yelp/detect-secrets.git
+    rev: v1.2.0
+    hooks:
+      - id: detect-secrets
+        args:
+          - '--baseline'
+          - '.secrets.baseline'
+        exclude: 'package-lock\.json$|Pipfile\.lock$|poetry\.lock$|^.secrets.baseline$'
+  - repo: https://github.com/jumanjihouse/pre-commit-hooks
+    rev: 2.1.6
+    hooks:
+      - id: shellcheck
+        exclude: 'gradlew$'
+      - id: shfmt
+        exclude: 'gradlew$'
+        args:
+          - '-i 2 -ci -bn -sr'
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.10.0
+    hooks:
+      - id: hadolint
+  - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
+    rev: 2.4.0
+    hooks:
+      - id: editorconfig-checker-system
+        alias: ec

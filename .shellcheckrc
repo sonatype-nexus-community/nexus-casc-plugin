@@ -1,0 +1,11 @@
+# Suggest quoting variables without metacharacters
+enable=quote-safe-variables
+
+# Suggest ${VAR} in place of $VAR
+enable=require-variable-braces
+
+# Suggest explicitly using -n in `[ $var ]`
+enable=avoid-nullary-conditions
+
+# Require [[ and warn about [ in Bash/Ksh
+enable=require-double-brackets

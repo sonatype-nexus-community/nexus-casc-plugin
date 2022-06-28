@@ -4,21 +4,21 @@ core:
   userAgentCustomization: "CasC test"
   connectionTimeout: 60
   connectionRetryAttempts: 10
-  #httpProxy:
-  #  host: proxy.internal.lan
-  #  port: 3128
-  #  username: nexus-user
-  #  password: ${PROXY_PASSWORD}
-  #httpsProxy:
-  #  host: proxy.internal.lan
-  #  port: 3128
-  #  username: nexus-user
-  #  password: ${PROXY_PASSWORD}
-  #  ntlmHost: dc.internal.lan
-  #  ntlmDomain: internal.lan
-  #nonProxyHosts:
-  #  - host1.internal.lan
-  #  - host2.internal.lan
+  # httpProxy:
+  #   host: proxy.internal.lan
+  #   port: 3128
+  #   username: nexus-user
+  #   password: ${PROXY_PASSWORD}
+  # httpsProxy:
+  #   host: proxy.internal.lan
+  #   port: 3128
+  #   username: nexus-user
+  #   password: ${PROXY_PASSWORD}
+  #   ntlmHost: dc.internal.lan
+  #   ntlmDomain: internal.lan
+  # nonProxyHosts:
+  #   - host1.internal.lan
+  #   - host2.internal.lan
 capabilities:
   - type: analytics-configuration
     enabled: false
@@ -365,8 +365,8 @@ repository:
         docker:
           forceBasicAuth: true  # Do not permit anonymous access to this repository
           v1Enabled: true
-          #httpPort: 8082   # Uncomment to activate
-          #httpsPort: 8083  # Requires Nexus Jetty be configured to use SSL Certificates
+          # httpPort: 8082   # Uncomment to activate
+          # httpsPort: 8083  # Requires Nexus Jetty be configured to use SSL Certificates
         storage:
           blobStoreName: docker
           strictContentTypeValidation: true
