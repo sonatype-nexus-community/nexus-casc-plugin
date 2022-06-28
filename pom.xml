@@ -25,6 +25,8 @@
 
         <junit-jupiter.version>5.6.2</junit-jupiter.version>
         <system-lambda.version>1.2.0</system-lambda.version>
+
+        <kar.finalName>${project.artifactId}-${project.version}</kar.finalName>
     </properties>
 
     <dependencies>
@@ -157,6 +159,7 @@
                         <configuration>
                             <resourcesDir>${project.basedir}/src/main/kar-resources</resourcesDir>
                             <classifier>bundle</classifier>
+                            <finalName>${kar.finalName}</finalName>
                         </configuration>
                     </execution>
                 </executions>
@@ -258,9 +261,10 @@
                     </execution>
                 </executions>
             </plugin>
-                </plugins>
-            </build>
+        </plugins>
+    </build>
 
+    <!--
     <repositories>
         <repository>
             <id>rso-public-grid</id>
@@ -287,4 +291,6 @@
             </snapshots>
         </pluginRepository>
     </pluginRepositories>
+    -->
+
 </project>
