@@ -2,11 +2,18 @@
 extends: default
 
 rules:
+  colons:
+    max-spaces-before: 0
+    # Allow aligning map values
+    max-spaces-after: -1
   braces:
     max-spaces-inside: 1
     level: error
   brackets:
     max-spaces-inside: 1
     level: error
+  indentation:
+    spaces: 2
+    indent-sequences: true
   line-length: disable
   truthy: disable

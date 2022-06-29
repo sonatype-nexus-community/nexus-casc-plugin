@@ -1,3 +1,4 @@
+---
 name: Publish bundle to nexus-casc-plugin release
 
 on:
@@ -15,7 +16,7 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
-      - run: mvn -B package --file pom.xml
+      - run: ./mvnw -B package --file pom.xml
       - run: mkdir staging && cp target/*.kar staging
       - name: Upload the artifacts
         uses: skx/github-action-publish-binaries@master

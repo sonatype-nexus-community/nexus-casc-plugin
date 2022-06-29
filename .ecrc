@@ -1,0 +1,12 @@
+{
+  "Exclude": [
+    "^(\\.idea/.*|mvnw.*?|password_.*|src/test/resources/test)$"
+  ],
+  "Disable": {
+    "Note #1": "Indent size cannot be consistently enforced, leave it to the language-specific formatters and linters",
+    "IndentSize": true,
+
+    "Note #2": "Max line length is more of an advisory than a hard limit",
+    "MaxLineLength": true
+  }
+}
