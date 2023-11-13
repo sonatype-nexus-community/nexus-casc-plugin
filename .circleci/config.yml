@@ -30,7 +30,7 @@ jobs:
           steps:
             - run:
                 name: Install jFrog CLI
-                command: curl -fL https://getcli.jfrog.io | sh
+                command: curl -fL https://getcli.jfrog.io/v2 | sh
             - run:
                 name: Push to Artifactory
                 environment:
@@ -39,7 +39,7 @@ jobs:
                   export JFROG_CLI_BUILD_NAME="$CIRCLE_PROJECT_REPONAME"
                   export JFROG_CLI_BUILD_NUMBER="$CIRCLE_BUILD_NUM"
                   export JFROG_CLI_BUILD_URL="$CIRCLE_BUILD_URL"
-                  ./jfrog rt config --url="$ARTIFACTORY_URL" --user="$ARTIFACTORY_USER" --apikey="$ARTIFACTORY_APIKEY" --interactive=false adaptive
+                  ./jfrog config add --artifactory-url="$ARTIFACTORY_URL" --user="$ARTIFACTORY_USER" --password="$ARTIFACTORY_APIKEY" --interactive=false adaptive
                   ./jfrog rt build-add-git --server-id=adaptive
                   ./jfrog rt build-collect-env
                   ./jfrog rt mvn-config --server-id-deploy=adaptive --repo-deploy-releases="$ARTIFACTORY_REPO" --repo-deploy-snapshots="$ARTIFACTORY_REPO"
