@@ -30,6 +30,7 @@ import org.sonatype.nexus.security.role.Role;
 import org.sonatype.nexus.security.role.RoleIdentifier;
 import org.sonatype.nexus.security.subject.FakeAlmightySubject;
 import org.sonatype.nexus.security.user.*;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
@@ -95,7 +96,7 @@ public class NexusCascPlugin extends StateGuardLifecycleSupport {
         }
 
         Config config;
-        Yaml yaml = new Yaml(new Constructor(Config.class));
+        Yaml yaml = new Yaml(new Constructor(Config.class, new LoaderOptions()));
         try {
             String yml = interpolator.interpolate(new String(Files.readAllBytes(Paths.get(configFile))));
             config = yaml.load(yml);
