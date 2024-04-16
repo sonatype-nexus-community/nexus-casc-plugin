@@ -4,13 +4,13 @@ Nexus CasC is a configuration as code plugin for sonatype nexus 3.
 
 This plugin allows to specify a YAML file to configure a Nexus instance on startup.
 
-## BREAKING CHANGES
+This repository maintains a fork with releases kept in track with the nexus releases.
 
-* v3.30.0-01: http proxy configuration has changed, please see the revised documentation
 
 ## Why Fork?
 
-Forked from: https://github.com/sventschui/nexus-casc-plugin
+Forked from: https://github.com/AdaptiveConsulting/nexus-casc-plugin
+Who forked from: https://github.com/sventschui/nexus-casc-plugin
 
 The original provider was unable to maintain the project
 

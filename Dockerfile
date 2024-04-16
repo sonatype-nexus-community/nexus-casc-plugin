@@ -1,7 +1,7 @@
-ARG SONATYPE_IMAGE=sonatype/nexus3:latest
+ARG SONATYPE_IMAGE=sonatype/nexus3:3.67.1-java11
 
 # hadolint ignore=DL3006
-FROM openjdk:8-jdk-alpine as BUILDER
+FROM amazoncorretto:11-alpine3.19-jdk as BUILDER
 
 COPY . "/build"
 WORKDIR "/build"
