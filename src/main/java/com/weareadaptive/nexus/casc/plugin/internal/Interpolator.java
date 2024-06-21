@@ -51,14 +51,18 @@ public class Interpolator extends ComponentSupport {
                 value = System.getenv(varName.toUpperCase());
             }
 
+            log.warn("interpolated string '{}' as {} : {}", str, varName, value);
+
             if (value == null) {
                 if (defaultValue == null) {
-                    log.warn("Found no value to interpolate variable {}", varName);
+                    log.warn("xxx Found no value to interpolate variable {}", varName);
                     continue;
                 }
 
                 value = defaultValue;
             }
+
+            log.warn("interpolated string '{}' as {} : {}", str, varName, value);
 
             Pattern subexpr = Pattern.compile(Pattern.quote(matcher.group(0)));
             str = subexpr.matcher(str).replaceAll(value);
