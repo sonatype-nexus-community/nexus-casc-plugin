@@ -3,7 +3,7 @@ name: Build and test nexus-casc-plugin
 
 on:
   push:
-    branches: [ master ]
+    branches: ["**"]
 
 jobs:
   verify:
