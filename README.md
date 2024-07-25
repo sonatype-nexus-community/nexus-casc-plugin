@@ -26,7 +26,7 @@ The original provider was unable to maintain the project
 
 Requires:
 
-* Java 8 JDK (OpenJDK is fine)
+* Java 11 JDK (OpenJDK is fine)
 * Maven (3.6.3 or higher preferred)
 * docker-compose (only if running the integration tests)
 
