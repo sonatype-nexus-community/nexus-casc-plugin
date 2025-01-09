@@ -17,6 +17,13 @@ jobs:
         with:
           java-version: 11
           distribution: 'adopt'
+      - name: Install Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.32.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
+        continue-on-error: false
+
       - run: ./mvnw -B verify --file pom.xml
       - run: mkdir staging && cp target/*.{k,j}ar staging
       - uses: actions/upload-artifact@v4
