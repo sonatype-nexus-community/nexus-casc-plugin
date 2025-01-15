@@ -4,24 +4,6 @@ Nexus CasC is a configuration as code plugin for sonatype nexus 3.
 
 This plugin allows to specify a YAML file to configure a Nexus instance on startup.
 
-This repository maintains a fork with releases kept in track with the nexus releases.
-
-## Why Fork?
-
-Forked from: <https://github.com/AdaptiveConsulting/nexus-casc-plugin>
-Who forked from: <https://github.com/sventschui/nexus-casc-plugin>
-
-The original provider was unable to maintain the project
-
-### Changes from the fork
-
-* The groupId has changed to avoid clashing with the original project
-* The build process now produces a `.kar` archive and can be directly deployed in
-  upstream Nexus via the `deploy` directory (providing the API versions match)
-* Unit tests and integration tests have been enabled
-* Basic CI has been added
-* Releases are currently pushed to our private repository, this may change in the future
-
 ## Building
 
 Requires:
@@ -398,3 +380,15 @@ repository:
 ```
 
 Additional examples including apt, raw and yum are in the file `default-nexus.yml`
+
+## History
+
+This project was [first established](https://github.com/sventschui/nexus-casc-plugin) by [Sven Tschui](https://github.com/sventschui) and then for continued support it was [forked](https://github.com/AdaptiveConsulting/nexus-casc-plugin) by [AdaptiveConsulting](https://github.com/AdaptiveConsulting) before it was finally [brought to Sonatype's attention](https://github.com/orgs/sonatype-nexus-community/discussions/8#discussioncomment-11381240) that a third [fork](https://github.com/larhauga/nexus-casc-plugin) was made by [Lars Haugen](larhauga) for continuity of maintenance.
+
+Because of this long history of community desire for and drive to maintain a CasC solution, the Sonatype Open Source Program Office has created this repository for the community to have discussion and contributions in a centralized location.
+
+This project is not currently on any official Sonatype roadmap, nor is it supported by Sonatype.
+
+## Contributing
+
+Please refer to the Sonatype Nexus Community [Contribution Guide](https://contribute.sonatype.com/docs/contributing/) for more information about getting involved with this project.
