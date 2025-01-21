@@ -383,7 +383,7 @@ Additional examples including apt, raw and yum are in the file `default-nexus.ym
 
 ## History
 
-This project was [first established](https://github.com/sventschui/nexus-casc-plugin) by [Sven Tschui](https://github.com/sventschui) and then for continued support it was [forked](https://github.com/AdaptiveConsulting/nexus-casc-plugin) by [AdaptiveConsulting](https://github.com/AdaptiveConsulting) before it was finally [brought to Sonatype's attention](https://github.com/orgs/sonatype-nexus-community/discussions/8#discussioncomment-11381240) that a third [fork](https://github.com/larhauga/nexus-casc-plugin) was made by [Lars Haugen](larhauga) for continuity of maintenance.
+This project was [first established](https://github.com/sventschui/nexus-casc-plugin) by [Sven Tschui](https://github.com/sventschui) and then for continued support it was [forked](https://github.com/AdaptiveConsulting/nexus-casc-plugin) by [AdaptiveConsulting](https://github.com/AdaptiveConsulting) before it was finally [brought to Sonatype's attention](https://github.com/orgs/sonatype-nexus-community/discussions/8#discussioncomment-11381240) that a third [fork](https://github.com/larhauga/nexus-casc-plugin) was made by [Lars Haugan](larhauga) for continuity of maintenance.
 
 Because of this long history of community desire for and drive to maintain a CasC solution, the Sonatype Open Source Program Office has created this repository for the community to have discussion and contributions in a centralized location.
 
