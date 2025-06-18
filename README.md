@@ -1,3 +1,14 @@
+>[!WARNING]
+Without complete rewrite this plugin CANNOT be used beyond Sonatype Nexus Repository 3.77.x.    
+
+Reason: **complete BWC Break in OSS NEXUS 3.78.0 (March 2025)**:        
+"Breaking change for custom plugins: Nexus Repository migrates to Spring Boot architecture.
+Custom OSGi bundle deployment no longer supported."    
+Links:
+1. [3-78-0-release-notes](https://help.sonatype.com/en/sonatype-nexus-repository-3-78-0-release-notes.html#breaking-change-for-custom-plugins--nexus-repository-migrates-to-spring-boot-architecture)    
+2. [removed/sunsetted osgi-bundle-capability](https://help.sonatype.com/en/sonatype-nexus-repository-3-feature-status.html#osgi-bundle-capability )  
+
+
 # Nexus Configuration as Code
 
 Nexus CasC is a configuration as code plugin for sonatype nexus 3.
